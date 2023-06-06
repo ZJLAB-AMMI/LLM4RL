@@ -71,9 +71,14 @@ Run ```$ tensorboard --logdir=log``` then navigate to ```http://localhost:6006/`
 * [Vicuna-13B](https://lmsys.org/projects/), An Open-Source Chatbot Impressing GPT-4 with 90%* ChatGPT Quality
 
 ## Demonstrations:
-<img src= "img/ours.gif" alt="apex" width="300"/>
-<img src= "img/baseline.gif" alt="apex" width="300"/>
-<img src= "img/always.gif" alt="apex" width="300"/>
+Our approach:
+<img src= "img/ours.gif" width="300"/>
+
+Hard-code baseline:
+<img src= "img/baseline.gif" width="300"/>
+
+Always baseline:
+<img src= "img/always.gif" width="300"/>
 
 
 ## Acknowledgements
