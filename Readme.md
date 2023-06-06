@@ -70,5 +70,11 @@ Run ```$ tensorboard --logdir=log``` then navigate to ```http://localhost:6006/`
 * [PPO](https://arxiv.org/abs/1707.06347), VPG with ratio objective and with log likelihood objective
 * [Vicuna-13B](https://lmsys.org/projects/), An Open-Source Chatbot Impressing GPT-4 with 90%* ChatGPT Quality
 
+## Demonstrations:
+<img src= "img/ours.gif" alt="apex" width="300"/>
+<img src= "img/baseline.gif" alt="apex" width="300"/>
+<img src= "img/always.gif" alt="apex" width="300"/>
+
+
 ## Acknowledgements
 This work is supported by Exploratory Research Project (No.2022RC0AN02) of Zhejiang Lab.
