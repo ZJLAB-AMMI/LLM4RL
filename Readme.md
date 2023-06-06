@@ -1,7 +1,7 @@
 ## LLM4RL for Minigrid
 LLM4RL is a small, modular library for study the problem of the Large Language Model(LLM) planning in Minigrid.
 
-<img src= "img/framework.png" alt="apex" width="800"/>
+<img src= "img/framework.png" alt="apex" width="1200"/>
 
 ## Purpose
 This repo is intended to serve as a foundation with which you can reproduce the results of the experiments detailed in our paper, "Enabling Efficient Interaction between an Algorithm Agent and LLMs: A Reinforcement Learning Approach."
