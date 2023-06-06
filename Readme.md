@@ -72,13 +72,13 @@ Run ```$ tensorboard --logdir=log``` then navigate to ```http://localhost:6006/`
 
 ## Demonstrations:
 Our approach:
-<img src= "img/ours.gif" width="300"/>
+<img src="img/ours.gif" width="300"/>
 
 Hard-code baseline:
-<img src= "img/baseline.gif" width="300"/>
+<img src="img/baseline.gif" width="300"/>
 
 Always baseline:
-<img src= "img/always.gif" width="300"/>
+<img src="img/always.gif" width="300"/>
 
 
 ## Acknowledgements
