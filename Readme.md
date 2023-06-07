@@ -80,6 +80,18 @@ Hard-code baseline:
 Always baseline:
 <img src="img/always.gif" width="300"/>
 
+## Paper and Citation
+If you would like to cite [our paper](https://arxiv.org/abs/2306.03604), please use the following:
+
+```bibtex
+@article{Hu2023enabling,
+  title   = {Enabling Efficient Interaction between an Algorithm Agent and an LLM: A Reinforcement Learning Approach},
+  author  = {Hu, Bin and Zhao, Chenyang and Zhang, Pu and Zhou, Zihao and Yang, Yuanhang and Xu, Zenglin and Liu, Bin},
+  journal = {arXiv preprint arXiv:2306.03604},
+  year    = {2023}
+}
+```
+
 
 ## Acknowledgements
 This work is supported by Exploratory Research Project (No.2022RC0AN02) of Zhejiang Lab.
