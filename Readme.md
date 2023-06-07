@@ -80,9 +80,8 @@ Run ```$ tensorboard --logdir=log``` then navigate to ```http://localhost:6006/`
 #### Always baseline:
 <img src="img/always.gif" width="300"/>
 
-## Paper and Citation
-If you would like to cite [our paper](https://arxiv.org/abs/2306.03604), please use the following:
-
+## Citation
+If you find [our work](https://arxiv.org/abs/2306.03604) useful, please kindly cite: 
 ```bibtex
 @article{Hu2023enabling,
   title   = {Enabling Efficient Interaction between an Algorithm Agent and an LLM: A Reinforcement Learning Approach},
