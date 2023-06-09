@@ -1,4 +1,4 @@
-# [Enabling Efficient Interaction between an Algorithm Agent and an LLM: A Reinforcement Learning Approach](https://arxiv.org/pdf/2306.03604.pdf)
+# [Enabling Intelligent Interactions between an Agent and an LLM: A Reinforcement Learning Approach](https://arxiv.org/pdf/2306.03604.pdf)
 ## Abstract
 Large language models (LLMs) encode a vast amount of world knowledge acquired from massive text datasets. Recent studies have demonstrated that LLMs can assist an algorithm agent in solving complex sequential decision making tasks in embodied environments by providing high-level instructions. However, interacting with LLMs can be time-consuming, as in many practical scenarios, they require a significant amount of storage space that can only be deployed on remote cloud server nodes. Additionally, using commercial LLMs can be costly since they may charge based on usage frequency. In this paper, we explore how to enable efficient and cost-effective interactions between the agent and an LLM. We propose a reinforcement learning based mediator model that determines when it is necessary to consult LLMs for high-level instructions to accomplish a target task. Experiments on 4 MiniGrid environments that entail planning sub-goals demonstrate that our method can learn to solve target tasks with only a few necessary interactions with an LLM, significantly reducing interaction costs in testing environments, compared with baseline methods. Experimental results also suggest that by learning a mediator model to interact with the LLM, the agent's performance becomes more robust against both exploratory and stochastic environments. 
 
@@ -84,7 +84,7 @@ Run ```$ tensorboard --logdir=log``` then navigate to ```http://localhost:6006/`
 If you find [our work](https://arxiv.org/abs/2306.03604) useful, please kindly cite: 
 ```bibtex
 @article{Hu2023enabling,
-  title   = {Enabling Efficient Interaction between an Algorithm Agent and an LLM: A Reinforcement Learning Approach},
+  title   = {Enabling Intelligent Interactions between an Agent and an LLM: A Reinforcement Learning Approach},
   author  = {Hu, Bin and Zhao, Chenyang and Zhang, Pu and Zhou, Zihao and Yang, Yuanhang and Xu, Zenglin and Liu, Bin},
   journal = {arXiv preprint arXiv:2306.03604},
   year    = {2023}
