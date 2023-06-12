@@ -24,8 +24,8 @@ if __name__ == "__main__":
     parser.add_argument("--task", type=str, default="SimpleDoorKey", help="SimpleDoorKey, KeyInBox, RandomBoxKey, ColoredDoorKey") 
     parser.add_argument("--save_name", type=str, required=True, help="path to folder containing policy and run details")
     parser.add_argument("--logdir", type=str, default="./log/")          # Where to log diagnostics to
-    parser.add_argument("--record", default=False) 
-    parser.add_argument("--seed", default=None) 
+    parser.add_argument("--record", default=False, action='store_true') 
+    parser.add_argument("--seed", default=None)
     parser.add_argument("--ask_lambda", type=float, default=0.01, help="weight on communication penalty term")
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--lam", type=float, default=0.95, help="Generalized advantage estimate discount")
@@ -40,6 +40,8 @@ if __name__ == "__main__":
     parser.add_argument("--test_num", type=int, default=100)
     
     parser.add_argument("--frame_stack", type=int, default=1)
+    parser.add_argument("--run_seed_list", type=int, nargs="*", default=[0])
+
 
 
     if sys.argv[1] == 'eval':
@@ -61,25 +63,16 @@ if __name__ == "__main__":
         policy.eval()
         eval = utils.Eval(args,policy)
         eval.eval_RL_policy(args.test_num)
-    elif sys.argv[1] == 'eval_multi_heads':
-        sys.argv.remove(sys.argv[1])
-        args = parser.parse_args()
- 
-        output_dir = os.path.join(args.logdir, args.policy, args.task, args.save_name)
-   
-        policy = torch.load(output_dir + "/acmodel.pt")
-        policy.eval()
-        eval = utils.Eval(args,policy)
-        eval.eval_multi_heads_policy(args.test_num)
 
     elif sys.argv[1] == 'train':
         sys.argv.remove(sys.argv[1])
         args = parser.parse_args()
         from env.Game import Game
-        for i in range(5): 
+
+        for i in args.run_seed_list:
             setup_seed(i)
             args.save_name = args.save_name + str(i)
-            game = Game(args)
+            game = Game(args, run_seed=i)
             game.reset()
             game.train()
     elif sys.argv[1] == 'train_RL':
@@ -87,13 +80,6 @@ if __name__ == "__main__":
         args = parser.parse_args()
         from env.Game_RL import Game_RL
         game = Game_RL(args)
-        game.reset()
-        game.train()
-    elif sys.argv[1] == 'train_multi_heads':
-        sys.argv.remove(sys.argv[1])
-        args = parser.parse_args()
-        from env.Game_multi_heads import Game_multi_heads
-        game = Game_multi_heads(args)
         game.reset()
         game.train()
     elif sys.argv[1] == 'baseline':
@@ -113,4 +99,4 @@ if __name__ == "__main__":
         eval.eval_always_ask(args.test_num)
     else:
         print("Invalid option '{}'".format(sys.argv[1]))
-    # ray.shutdown()
+

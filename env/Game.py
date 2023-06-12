@@ -19,15 +19,16 @@ import torch
 import numpy as np
 import time
 import skill
+import cv2
 
 prefix = os.getcwd()
 task_info_json = os.path.join(prefix, "prompt/task_info.json")
 class Game:
-    def __init__(self, args, policy=None):
+    def __init__(self, args, policy=None, run_seed=0):
          
         self.task = args.task
         self.device = args.device
-        self.planner = Planner(self.task) 
+        self.planner = Planner(self.task, run_seed) 
         self.max_ep_len, self.decription, self.task_level, self.task_example, self.configurations = self.load_task_info(self.task)
         if args.seed is not None:
             self.seed = int(args.seed)
@@ -66,6 +67,7 @@ class Game:
     def load_task_info(self, task):
         with open(task_info_json, 'r') as f:
             task_info = json.load(f)
+        task = task.lower()
         episode_length = int(task_info[task]["episode"])
         task_description = task_info[task]['description']
         task_example = task_info[task]['example']
@@ -166,13 +168,13 @@ class Game:
                 dist, value = self.Communication_net(torch.Tensor(com_obs).to(self.device))         
                 ask_flag = dist.sample()
                 log_probs = dist.log_prob(ask_flag)
-                if ask_flag == 1:
-                    interactions += 1
+
                 if skill_done or ask_flag:
+                    interactions += 1
                     skill = self.planner(obs)
                     # print(skill)
                     if pre_skill == skill: # additional penalty term for repeat same skill
-                        repeat_feedback = np.array([1.])
+                        repeat_feedback = np.array([.5])
                     elif pre_skill is None:
                         repeat_feedback = np.array([0.])
                     else:
@@ -186,10 +188,10 @@ class Game:
                 ## one step do one action in action_list
                 next_obs, reward, done, info = env.step(np.array([action]))
 
-                comm_penalty = (self.ask_lambda + 0.1 * repeat_feedback) * ask_flag.to("cpu").numpy() ## communication penalty
+                comm_penalty = (self.ask_lambda + 0.1 * repeat_feedback) * (ask_flag.to("cpu").numpy() or skill_done) ## communication penalty
                 comm_reward = reward - comm_penalty 
     
-                buffer.store(com_obs, ask_flag.to("cpu").numpy(), comm_reward, value.to("cpu").numpy(), log_probs.to("cpu").numpy(), reward) #TODO:check shape
+                buffer.store(com_obs, ask_flag.to("cpu").numpy(), comm_reward, value.to("cpu").numpy(), log_probs.to("cpu").numpy(), reward) 
                 if self.frame_stack >1:
                     obs = next_obs
                     com_obs = obs
@@ -219,8 +221,16 @@ class Game:
                 self.planner.reset(show_dialogue)
                 
                 if self.record_frames:
-                    video_frames = [obs['rgb']]
-                    goal_frames = ["start"] 
+                    img_array = []
+                    dir_path = os.path.join(self.logger.dir, 'video')
+                    try:
+                        os.makedirs(dir_path)
+                    except OSError:
+                        pass
+                    txt_path = os.path.join(dir_path, str(seed) + '.txt')
+                    with open(txt_path, 'a+') as f:
+                        f.seek(0)
+                        f.truncate()
 
                 done = False
                 skill_done = True
@@ -237,21 +247,39 @@ class Game:
                 utils.global_param.set_value('exp', None)
                 utils.global_param.set_value('explore_done', False)
                 while not done and traj_len < self.max_ep_len:
-                    dist, _ = self.Communication_net(torch.Tensor(com_obs).to(self.device))
-                    ask_flag = dist.sample()
-                    if ask_flag == 1:
-                        interactions += 1
+                    ask_flag = self.Communication_net.get_action(torch.Tensor(com_obs).to(self.device))
+
                     if skill_done or ask_flag:
+                        interactions += 1
                         skill = self.planner(obs)
                         # print(skill)
                         if pre_skill == skill: # additional penalty term for repeat same skill
-                            repeat_feedback = np.array([1.])
+                            repeat_feedback = np.array([.5])
                         elif pre_skill is None:
                             repeat_feedback = np.array([0.])
                         else:
                             repeat_feedback = np.array([-0.1])
                         pre_skill = skill
                         self.Executive_net = Executive_net(skill,obs[0],self.agent_view_size)
+                        
+                    if self.record_frames:
+                        img = env.get_mask_render()
+                        text = str(traj_len) + ' ' + self.Executive_net.current_skill
+                        if skill_done or ask_flag == 1:
+                            text += ' (ask)'
+                            with open(txt_path, 'a+') as f:
+                                f.write('step:' + str(traj_len) + '\n' + self.planner.dialogue_user + '\n')
+                            
+                        cv2.putText(img, 
+                            text, 
+                            org=(10,300), 
+                            fontFace=cv2.FONT_HERSHEY_TRIPLEX, 
+                            fontScale=0.6,
+                            color=(255,255,255), 
+                            thickness=1, 
+                            lineType=cv2.LINE_AA)
+                        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+                        img_array.append(img)
 
                     ## RL choose skill, and return action_list
                     action, skill_done = self.Executive_net(obs[0])
@@ -265,7 +293,7 @@ class Game:
                         his_obs = obs
                         obs = next_obs
                         com_obs = obs - his_obs
-                    comm_penalty = (self.ask_lambda + 0.1 * repeat_feedback) * ask_flag.to("cpu").numpy()  ## communication penalty
+                    comm_penalty = (self.ask_lambda + 0.1 * repeat_feedback) * (ask_flag.to("cpu").numpy() or skill_done)  ## communication penalty
                     comm_reward = reward - comm_penalty
                     #reward = 1.0*reward
                     ep_return += comm_reward
@@ -280,6 +308,20 @@ class Game:
                 ep_game_returns += [ep_game_return]
                 ep_lens += [traj_len]
                 ep_interactions += [interactions]
+
+                if self.record_frames:
+                    # save vedio
+                    height, width, layers = img.shape
+                    size = (width,height)
+                    video_path = os.path.join(dir_path, str(seed) + '.avi')
+                    out = cv2.VideoWriter(video_path, 
+                                        fourcc=cv2.VideoWriter_fourcc(*'DIVX'), 
+                                        fps=3, 
+                                        frameSize=size)
+
+                    for img in img_array:
+                        out.write(img)
+                    out.release()
             return np.mean(ep_returns), np.mean(ep_lens), np.mean(ep_interactions), np.mean(ep_game_returns)
 
     def baseline_eval(self, env_fn, trajs=1, seed=None, show_dialogue=False):
@@ -295,8 +337,16 @@ class Game:
                 self.planner.reset(show_dialogue)
                 
                 if self.record_frames:
-                    video_frames = [obs['rgb']]
-                    goal_frames = ["start"] 
+                    img_array = []
+                    dir_path = os.path.join(self.logger.dir, 'video')
+                    try:
+                        os.makedirs(dir_path)
+                    except OSError:
+                        pass
+                    txt_path = os.path.join(dir_path, str(seed) + '.txt')
+                    with open(txt_path, 'a+') as f:
+                        f.seek(0)
+                        f.truncate()
 
                 done = False
                 skill_done = True
@@ -312,12 +362,32 @@ class Game:
                         # print(skill)
                         self.Executive_net = Executive_net(skill,obs[0],self.agent_view_size)
                         interactions += 1
+                        
+                    if self.record_frames:
+                        img = env.get_mask_render()
+                        text = str(traj_len) + ' ' + self.Executive_net.current_skill
+                        if skill_done:
+                            text += ' (ask)'
+                            with open(txt_path, 'a+') as f:
+                                f.write('step:' + str(traj_len) + '\n' + self.planner.logging_dialogue + '\n')
+
+                        cv2.putText(img, 
+                            text, 
+                            org=(10,300), 
+                            fontFace=cv2.FONT_HERSHEY_TRIPLEX, 
+                            fontScale=0.6,
+                            color=(255,255,255), 
+                            thickness=1, 
+                            lineType=cv2.LINE_AA)
+                        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+                        img_array.append(img)
+                        
                     ## RL choose skill, and return action_list
                     action, skill_done = self.Executive_net(obs[0])
                     ## one step do one action in action_list
                     obs, reward, done, info = env.step(np.array([action]))
                     comm_reward = reward - self.ask_lambda * float(skill_done) ## communication penalty
-                
+
                     ep_return += comm_reward
                     ep_game_return += 1.0*reward
                     traj_len += 1
@@ -330,6 +400,20 @@ class Game:
                 ep_game_returns += [ep_game_return]
                 ep_lens += [traj_len]
                 ep_interactions += [interactions]
+
+                if self.record_frames:
+                    # save vedio
+                    height, width, layers = img.shape
+                    size = (width,height)
+                    video_path = os.path.join(dir_path, str(seed) + '.avi')
+                    out = cv2.VideoWriter(video_path, 
+                                        fourcc=cv2.VideoWriter_fourcc(*'DIVX'), 
+                                        fps=3, 
+                                        frameSize=size)
+
+                    for img in img_array:
+                        out.write(img)
+                    out.release()
             return np.mean(ep_returns), np.mean(ep_lens), np.mean(ep_interactions), np.mean(ep_game_returns)
         
     def ask_eval(self, env_fn, trajs=1, seed=None, show_dialogue=False):
@@ -344,8 +428,16 @@ class Game:
                 #print(f"[INFO]: Evaluating the task is ", self.task)
                 self.planner.reset(show_dialogue)
                 if self.record_frames:
-                    video_frames = [obs['rgb']]
-                    goal_frames = ["start"] 
+                    img_array = []
+                    dir_path = os.path.join(self.logger.dir, 'video')
+                    try:
+                        os.makedirs(dir_path)
+                    except OSError:
+                        pass
+                    txt_path = os.path.join(dir_path, str(seed) + '.txt')
+                    with open(txt_path, 'a+') as f:
+                        f.seek(0)
+                        f.truncate()
 
                 done = False
                 skill_done = True
@@ -362,13 +454,31 @@ class Game:
                         skill = self.planner(obs)
                         # print(skill)
                         if pre_skill == skill: # additional penalty term for repeat same skill
-                            repeat_feedback = np.array([1.])
+                            repeat_feedback = np.array([.5])
                         elif pre_skill is None:
                             repeat_feedback = np.array([0.])
                         else:
                             repeat_feedback = np.array([-0.1])
                         pre_skill = skill
                         self.Executive_net = Executive_net(skill,obs[0],self.agent_view_size)
+                        
+                    if self.record_frames:
+                        img = env.get_mask_render()
+                        text = str(traj_len) + ' ' + self.Executive_net.current_skill
+                        text += ' (ask)'
+                        with open(txt_path, 'a+') as f:
+                            f.write('step:' + str(traj_len) + '\n' + self.planner.logging_dialogue + '\n')
+
+                        cv2.putText(img, 
+                            text, 
+                            org=(10,300), 
+                            fontFace=cv2.FONT_HERSHEY_TRIPLEX, 
+                            fontScale=0.6,
+                            color=(255,255,255), 
+                            thickness=1, 
+                            lineType=cv2.LINE_AA)
+                        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+                        img_array.append(img)
 
                     ## RL choose skill, and return action_list
                     action, skill_done = self.Executive_net(obs[0])
@@ -389,6 +499,20 @@ class Game:
                 ep_game_returns += [ep_game_return]
                 ep_lens += [traj_len]
                 ep_interactions += [traj_len]
+                
+                if self.record_frames:
+                    # save vedio
+                    height, width, layers = img.shape
+                    size = (width,height)
+                    video_path = os.path.join(dir_path, str(seed) + '.avi')
+                    out = cv2.VideoWriter(video_path, 
+                                        fourcc=cv2.VideoWriter_fourcc(*'DIVX'), 
+                                        fps=3, 
+                                        frameSize=size)
+
+                    for img in img_array:
+                        out.write(img)
+                    out.release()
             return np.mean(ep_returns), np.mean(ep_lens), np.mean(ep_interactions), np.mean(ep_game_returns)
 if __name__ == '__main__':
    pass

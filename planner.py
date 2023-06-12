@@ -26,6 +26,8 @@ class Base_Planner(ABC):
         self.dialogue_user = ''
         self.dialogue_logger = ''         
         self.show_dialogue = False
+        self.llm_model = None
+        self.llm_url = None
     def reset(self, show=False):
         self.dialogue_user = ''
         self.dialogue_logger = ''
@@ -33,7 +35,8 @@ class Base_Planner(ABC):
 
     ## initial prompt, write in 'prompt/task_info.json
     def initial_planning(self, decription, example):
-
+        if self.llm_model is None:
+            assert "no select Large Language Model"
         prompts = decription + example
         self.dialogue_system += decription + "\n"
         self.dialogue_system += example + "\n"
@@ -42,10 +45,10 @@ class Base_Planner(ABC):
         server_error_cnt = 0
         while server_error_cnt<10:
             try:
-                url = 'http://10.106.27.11:8000/v1/chat/completions'
+                url = self.llm_url
                 headers = {'Content-Type': 'application/json'}
                 
-                data = {'model': "vicuna-7b-1", "messages":[{"role": "system", "content": prompts}]}
+                data = {'model': self.llm_model, "messages":[{"role": "system", "content": prompts}]}
                 response = requests.post(url, headers=headers, json=data)
                 
                 if response.status_code == 200:
@@ -67,12 +70,12 @@ class Base_Planner(ABC):
         while server_error_cnt<10:
             try:
                 #response =  openai.Completion.create(prompt_text)
-                url = 'http://10.106.27.11:8000/v1/chat/completions'
+                url = self.llm_url
                 headers = {'Content-Type': 'application/json'}
                 
                 # prompt_text
                 
-                data = {'model': "vicuna-7b-1", "messages":[{"role": "user", "content": prompt_text }]}
+                data = {'model': self.llm_model, "messages":[{"role": "user", "content": prompt_text }]}
                 response = requests.post(url, headers=headers, json=data)
                 
                 
@@ -114,10 +117,16 @@ class Base_Planner(ABC):
         pass
 
 class SimpleDoorKey_Planner(Base_Planner):
-    def __init__(self):
+    def __init__(self, seed=0):
         super().__init__()
         
         self.mediator = SimpleDoorKey_Mediator()
+        if seed %2 ==0:
+            self.llm_model = "vicuna-7b-3"
+            self.llm_url = 'http://10.109.116.3:8003/v1/chat/completions'
+        else:
+            self.llm_model = "vicuna-7b-0"
+            self.llm_url = 'http://10.109.116.3:8000/v1/chat/completions'
 
     def __call__(self, input):
         return self.forward(input)
@@ -129,7 +138,7 @@ class SimpleDoorKey_Planner(Base_Planner):
         ## reset dialogue
         if self.show_dialogue:
             print(self.dialogue_system)
-      
+
         self.step_planning("reset")
 
     def forward(self, obs):
@@ -148,9 +157,15 @@ class SimpleDoorKey_Planner(Base_Planner):
    
     
 class KeyInBox_Planner(Base_Planner):
-    def __init__(self):
+    def __init__(self,seed=0):
         super().__init__()
         self.mediator = KeyInBox_Mediator()
+        if seed %2 == 0:
+            self.llm_model = "vicuna-7b-4"
+            self.llm_url = 'http://10.109.116.3:8004/v1/chat/completions'
+        else:
+            self.llm_model = "vicuna-7b-1"
+            self.llm_url = 'http://10.109.116.3:8001/v1/chat/completions'
 
     def __call__(self, input):
         return self.forward(input)
@@ -179,13 +194,17 @@ class KeyInBox_Planner(Base_Planner):
         skill = self.mediator.LLM2RL(plan)
         return skill
 
-from torch.distributions.categorical import Categorical
-import torch
+
 class RandomBoxKey_Planner(Base_Planner):
-    def __init__(self):
+    def __init__(self, seed=0):
         super().__init__()
         self.mediator = RandomBoxKey_Mediator()
-     
+        if seed %2 == 0:
+            self.llm_model = "vicuna-7b-5"
+            self.llm_url = 'http://10.109.116.3:8005/v1/chat/completions'
+        else:
+            self.llm_model = "vicuna-7b-2"
+            self.llm_url = 'http://10.109.116.3:8002/v1/chat/completions'    
     def __call__(self, input):
         return self.forward(input)
     
@@ -213,9 +232,16 @@ class RandomBoxKey_Planner(Base_Planner):
         return skill
    
 class ColoredDoorKey_Planner(Base_Planner):
-    def __init__(self):
+    def __init__(self,seed=0):
         super().__init__()
         self.mediator = ColoredDoorKey_Mediator()
+        if seed %2 == 0:
+            self.llm_model = "vicuna-7b-7"
+            self.llm_url = 'http://10.109.116.3:5678/v1/chat/completions'
+        else:
+            self.llm_model = "vicuna-7b-6"
+            self.llm_url = 'http://10.109.116.3:8006/v1/chat/completions'
+
 
     def __call__(self, input):
         return self.forward(input)
@@ -245,13 +271,13 @@ class ColoredDoorKey_Planner(Base_Planner):
         return skill
    
 
-def Planner(task):
+def Planner(task,seed=0):
     if task.lower() == "simpledoorkey":
-        planner = SimpleDoorKey_Planner()
+        planner = SimpleDoorKey_Planner(seed)
     elif task.lower() == "keyinbox":
-        planner = KeyInBox_Planner()
+        planner = KeyInBox_Planner(seed)
     elif task.lower() == "randomboxkey":
-        planner = RandomBoxKey_Planner()
+        planner = RandomBoxKey_Planner(seed)
     elif task.lower() == "coloreddoorkey":
-        planner = ColoredDoorKey_Planner()
+        planner = ColoredDoorKey_Planner(seed)
     return planner

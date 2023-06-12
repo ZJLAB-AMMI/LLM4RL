@@ -8,7 +8,7 @@
 @Desc    :   None
 '''
 
-from commuication_net import RL_Net
+from commuication_net import Communication_Net
 from executive_net import Executive_net
 import os, json, sys
 import utils
@@ -30,7 +30,14 @@ class Game_RL(Game):
         self.record_frames = args.record
         if policy is None:
             ## communication network for ask
-            self.RL_net = RL_Net(obs_space, 5).to(self.device)
+            """ select skill by RL instand of LLM 
+            Action 0: Explore
+            Action 1: go to key
+            Action 2: go to door
+            Action 3: pickup key
+            Action 4: toggle door
+            """
+            self.RL_net = Communication_Net(obs_space, 5).to(self.device)
         else:
             self.RL_net = policy.to(self.device)
 
@@ -63,7 +70,7 @@ class Game_RL(Game):
         elif skill_flag == 3:
             goal["action"] = SKILL_TO_IDX["pickup"]
         elif skill_flag == 4:
-            goal["action"] = SKILL_TO_IDX["unlock"]
+            goal["action"] = SKILL_TO_IDX["toggle"]
         return [goal]
 
     def collect(self, env_fn, seed=None):
@@ -97,12 +104,9 @@ class Game_RL(Game):
 
                 ## RL choose skill, and return action_list
                 action, skill_done = self.Executive_net(obs[0])
-                # print("last action", action)
+
                 ## one step do one action in action_list
                 next_obs, reward, done, info = env.step(np.array([action]))
-                # print("next_obs\n", next_obs[0,:,:,4].T)
-                # print("next_obs_pos\n", next_obs[0,:,:,7].T)    
-                # print("done?", done) 
     
                 buffer.store(com_obs, skill_flag.to("cpu").numpy(), reward, value.to("cpu").numpy(), log_probs.to("cpu").numpy()) 
                 if self.frame_stack >1:
@@ -145,8 +149,7 @@ class Game_RL(Game):
                 utils.global_param.set_value('exp', None)
                 utils.global_param.set_value('explore_done', False)
                 while not done and traj_len < self.max_ep_len:
-                    dist, _ = self.RL_net(torch.Tensor(com_obs).to(self.device))
-                    skill_flag = dist.sample()
+                    skill_flag = self.RL_net.get_action(torch.Tensor(com_obs).to(self.device))                
 
                     skill = self.flag2skill(obs[0],skill_flag)
                     if skill != pre_skill or skill_done:

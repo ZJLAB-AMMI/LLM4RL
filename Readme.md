@@ -2,7 +2,7 @@
 ## Abstract
 Large language models (LLMs) encode a vast amount of world knowledge acquired from massive text datasets. Recent studies have demonstrated that LLMs can assist an algorithm agent in solving complex sequential decision making tasks in embodied environments by providing high-level instructions. However, interacting with LLMs can be time-consuming, as in many practical scenarios, they require a significant amount of storage space that can only be deployed on remote cloud server nodes. Additionally, using commercial LLMs can be costly since they may charge based on usage frequency. In this paper, we explore how to enable efficient and cost-effective interactions between the agent and an LLM. We propose a reinforcement learning based mediator model that determines when it is necessary to consult LLMs for high-level instructions to accomplish a target task. Experiments on 4 MiniGrid environments that entail planning sub-goals demonstrate that our method can learn to solve target tasks with only a few necessary interactions with an LLM, significantly reducing interaction costs in testing environments, compared with baseline methods. Experimental results also suggest that by learning a mediator model to interact with the LLM, the agent's performance becomes more robust against both exploratory and stochastic environments. 
 
-<img src= "img/framework.png" alt="apex" width="1200"/>
+<img src= "img/framework.png" alt="llm4rl" width="1200"/>
 
 ## Purpose
 This repo is intended to serve as a foundation with which you can reproduce the results of the experiments detailed in our paper, "Enabling Efficient Interaction between an Algorithm Agent and LLMs: A Reinforcement Learning Approach."
@@ -22,7 +22,7 @@ python main.py train --task SimpleDoorKey --save_name experiment01
 to eval the trained model "experiment01" on a SimpleDoorKey environment,
 
 ```bash
-python main.py eval --task SimpleDoorKey --save_name experiment01 
+python main.py eval --task SimpleDoorKey --save_name experiment01 --show --record
 ```
 
 to run other baseline,
@@ -68,7 +68,7 @@ Run ```$ tensorboard --logdir=log``` then navigate to ```http://localhost:6006/`
 ## Algorithms:
 #### Currently implemented:
 * [PPO](https://arxiv.org/abs/1707.06347), VPG with ratio objective and with log likelihood objective
-* [Vicuna-13B](https://lmsys.org/projects/), An Open-Source Chatbot Impressing GPT-4 with 90%* ChatGPT Quality
+* [Vicuna-7B](https://lmsys.org/projects/), An Open-Source Chatbot Impressing GPT-4 with 90%* ChatGPT Quality
 
 ## Demonstrations:
 #### Our approach:

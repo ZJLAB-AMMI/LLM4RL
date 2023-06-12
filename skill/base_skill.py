@@ -50,38 +50,6 @@ class BaseSkill():
     def done_check(self):
         return False
     
-# class Pickup(BaseSkill):
-#     def __init__(self, init_obs):
-#         init_obs = init_obs[:,:,-4:]
-#         self.plan(init_obs)
-    
-#     def plan(self, init_obs):
-#         self.unpack_obs(init_obs)
-#         if self.map[self.agent_pos[0], self.agent_pos[1]] == 1: #not carrying
-#             self.path = [3]
-#         else:
-#             if self.get_surrounding_obj(2) == 1 and self.get_surrounding_obj(2, 2) != 4: # back
-#                 self.path = [0, 0, 4, 0, 0, 3]
-#             elif self.get_surrounding_obj(1) == 1 and self.get_surrounding_obj(1, 2) != 4: # right
-#                 self.path = [1, 4, 0, 3]
-#             elif self.get_surrounding_obj(3) == 1: # left
-#                 self.path = [0, 4, 1, 3]
-#             else:
-#                 print('No path found!!!')
-#                 self.path = None
-                
-#     def get_surrounding_obj(self, angle, distance=1):
-#         target_dir = (self.agent_dir + angle) % 4
-#         target_pos = self.agent_pos + DIR_TO_VEC[target_dir] * distance
-#         target_obj = self.map[target_pos[0], target_pos[1]]
-#         return target_obj
-    
-#     def step(self, obs):
-#         action = self.path.pop(0)
-#         done = len(self.path) == 0
-#         return action, done
-        
-        
 class Pickup(BaseSkill):
     def __init__(self, init_obs):
         init_obs = init_obs[:,:,-4:]

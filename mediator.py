@@ -179,7 +179,7 @@ class SimpleDoorKey_Mediator(Base_Mediator):
             if context != "":
                 context += ", "
             context += f"carry {carry_object}"
-        context = f"observation:{{{context}}} "
+        context = f"observation: {{{context}}} "
         return context
     
     def parser(self, text):
@@ -196,16 +196,21 @@ class SimpleDoorKey_Mediator(Base_Mediator):
             act = SKILL_TO_IDX["toggle"]
         else:
             print("Unknown Planning :", text)
+            act = 6 # do nothing
         # object:
-        if "key" in text:
-            obj = OBJECT_TO_IDX["key"]
-            coordinate = self.obj_coordinate["key"]
-        elif "door" in text:
-            obj = OBJECT_TO_IDX["door"]
-            coordinate = self.obj_coordinate["door"]
-        else:
-            obj = OBJECT_TO_IDX["empty"]
-            coordinate = None
+        try:
+            if "key" in text:
+                obj = OBJECT_TO_IDX["key"]
+                coordinate = self.obj_coordinate["key"]
+            elif "door" in text:
+                obj = OBJECT_TO_IDX["door"]
+                coordinate = self.obj_coordinate["door"]
+            else:
+                obj = OBJECT_TO_IDX["empty"]
+                coordinate = None
+        except:
+            print("Unknown Planning :", text)
+            act = 6 # do nothing
         return act, obj, coordinate
     
     
@@ -292,22 +297,27 @@ class KeyInBox_Mediator(Base_Mediator):
             act = SKILL_TO_IDX["toggle"]
         else:
             print("Unknown Planning :", text)
+            act = 6 # do nothing
         # object:
-        if "key" in text:
-            obj = OBJECT_TO_IDX["key"]
-            if "key" in self.obj_coordinate.keys():
-                coordinate = self.obj_coordinate["key"]
-            else:
+        try:
+            if "key" in text:
+                obj = OBJECT_TO_IDX["key"]
+                if "key" in self.obj_coordinate.keys():
+                    coordinate = self.obj_coordinate["key"]
+                else:
+                    coordinate = self.obj_coordinate["box"]
+            elif "door" in text:
+                obj = OBJECT_TO_IDX["door"]
+                coordinate = self.obj_coordinate["door"]
+            elif "box" in text:
+                obj = OBJECT_TO_IDX["box"]
                 coordinate = self.obj_coordinate["box"]
-        elif "door" in text:
-            obj = OBJECT_TO_IDX["door"]
-            coordinate = self.obj_coordinate["door"]
-        elif "box" in text:
-            obj = OBJECT_TO_IDX["box"]
-            coordinate = self.obj_coordinate["box"]
-        else:
-            obj = OBJECT_TO_IDX["empty"]
-            coordinate = None
+            else:
+                obj = OBJECT_TO_IDX["empty"]
+                coordinate = None
+        except:
+            print("Unknown Planning :", text)
+            act = 6 # do nothing
         return act, obj, coordinate
     
     
@@ -376,7 +386,7 @@ class RandomBoxKey_Mediator(Base_Mediator):
             if context != "":
                 context += ", "
             context += f"carry {carry_object}"
-        context = f"observation: {{{context}}}, "
+        context = f"observation: {{{context}}} "
         return context
     
     def parser(self, text):
@@ -393,22 +403,27 @@ class RandomBoxKey_Mediator(Base_Mediator):
             act = SKILL_TO_IDX["toggle"]
         else:
             print("Unknown Planning :", text)
+            act = 6 # do nothing
         # object:
-        if "key" in text:
-            obj = OBJECT_TO_IDX["key"]
-            if "key" in self.obj_coordinate.keys():
-                coordinate = self.obj_coordinate["key"]
-            else:
+        try:
+            if "key" in text:
+                obj = OBJECT_TO_IDX["key"]
+                if "key" in self.obj_coordinate.keys():
+                    coordinate = self.obj_coordinate["key"]
+                else:
+                    coordinate = self.obj_coordinate["box"]
+            elif "door" in text:
+                obj = OBJECT_TO_IDX["door"]
+                coordinate = self.obj_coordinate["door"]
+            elif "box" in text:
+                obj = OBJECT_TO_IDX["box"]
                 coordinate = self.obj_coordinate["box"]
-        elif "door" in text:
-            obj = OBJECT_TO_IDX["door"]
-            coordinate = self.obj_coordinate["door"]
-        elif "box" in text:
-            obj = OBJECT_TO_IDX["box"]
-            coordinate = self.obj_coordinate["box"]
-        else:
-            obj = OBJECT_TO_IDX["empty"]
-            coordinate = None
+            else:
+                obj = OBJECT_TO_IDX["empty"]
+                coordinate = None
+        except:
+            print("Unknown Planning :", text)
+            act = 6 # do nothing
         return act, obj, coordinate
     
     
@@ -456,7 +471,7 @@ class ColoredDoorKey_Mediator(Base_Mediator):
                 else:
                     if context != "":
                         context += ", "
-                    context += f"observed a {object}" 
+                    context += f"observed {object}" 
                     self.obj_coordinate[object] = (i,j)
 
                     if (agent_pos + DIRECTION[agent_dir] == key).all():
@@ -468,13 +483,13 @@ class ColoredDoorKey_Mediator(Base_Mediator):
                 object = f"{IDX_TO_COLOR[color]} door"
                 if context != "":
                     context += ", "
-                context += f"observed a {object}"
+                context += f"observed {object}"
                 self.obj_coordinate[object] = (i,j)
 
-        if block_object is not None:
-            if context != "":
-                context += ", "
-            context += f"block by {block_object}"
+        # if block_object is not None:
+        #     if context != "":
+        #         context += ", "
+        #     context += f"block by {block_object}"
 
         if context == '':
             context += "observed {}".format('nothing')
@@ -482,7 +497,8 @@ class ColoredDoorKey_Mediator(Base_Mediator):
             if context != "":
                 context += ", "
             context += f"carry {carry_object}"
-        context = f"observation:{{{context}}},"
+        #context = f"observation:{{{context}}},"
+        context = f"Q: [{context}]"
         return context
     
     def parser(self, text):
@@ -499,20 +515,34 @@ class ColoredDoorKey_Mediator(Base_Mediator):
             act = SKILL_TO_IDX["toggle"]
         else:
             print("Unknown Planning :", text)
+            act = 6 # do nothing
         # object:
-        if "key" in text:
-            obj = OBJECT_TO_IDX["key"]    
-            words = text.split(' ')
-            object_word = words[-2] + " " + words[-1]
-            coordinate = self.obj_coordinate[object_word]
-        elif "door" in text:
-            obj = OBJECT_TO_IDX["door"]
-            words = text.split(' ')
-            object_word = words[-2] + " " + words[-1]
-            coordinate = self.obj_coordinate[object_word]
-        else:
-            obj = OBJECT_TO_IDX["empty"]
+        try:
+            if "key" in text:
+                obj = OBJECT_TO_IDX["key"]    
+                words = text.split(' ')
+                filter_words = []
+                for w in words:
+                    w1="".join(c for c in w if c.isalpha())
+                    filter_words.append(w1)
+                object_word = filter_words[-2] + " " + filter_words[-1]
+                coordinate = self.obj_coordinate[object_word]
+            elif "door" in text:
+                obj = OBJECT_TO_IDX["door"]
+                words = text.split(' ')
+                filter_words = []
+                for w in words:
+                    w1="".join(c for c in w if c.isalpha())
+                    filter_words.append(w1)
+                object_word = filter_words[-2] + " " + filter_words[-1]
+                coordinate = self.obj_coordinate[object_word]
+            else:
+                obj = OBJECT_TO_IDX["empty"]
+                coordinate = None
+        except:
+            print("Unknown Planning :", text)
             coordinate = None
+            act = 6 # do nothing
         return act, obj, coordinate
     
     
