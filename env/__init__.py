@@ -1,12 +1,10 @@
 from .historicalobs import *
 from .singleroom import *
 from .boxkey import *
-from .monster import *
 from .randomboxkey import *
 from .keydistraction import *
 from .Game import *
 from .Game_RL import *
-from .Game_multi_heads import *
 gym.envs.register(
     id='MiniGrid-SimpleDoorKey-Min5-Max10-View3',
     entry_point='env.singleroom:SingleRoomEnv',

@@ -123,10 +123,10 @@ class SimpleDoorKey_Planner(Base_Planner):
         self.mediator = SimpleDoorKey_Mediator()
         if seed %2 ==0:
             self.llm_model = "vicuna-7b-3"
-            self.llm_url = 'http://10.109.116.3:8003/v1/chat/completions'
+            self.llm_url = 'http://10.106.27.11:8003/v1/chat/completions'
         else:
             self.llm_model = "vicuna-7b-0"
-            self.llm_url = 'http://10.109.116.3:8000/v1/chat/completions'
+            self.llm_url = 'http://10.106.27.11:8000/v1/chat/completions'
 
     def __call__(self, input):
         return self.forward(input)
@@ -139,8 +139,7 @@ class SimpleDoorKey_Planner(Base_Planner):
         if self.show_dialogue:
             print(self.dialogue_system)
 
-        self.step_planning("reset")
-
+       
     def forward(self, obs):
         text = self.mediator.RL2LLM(obs)
         # print(text)
@@ -178,7 +177,6 @@ class KeyInBox_Planner(Base_Planner):
         if self.show_dialogue:
             print(self.dialogue_system)
 
-        self.step_planning("reset")
 
     def forward(self, obs):
         text = self.mediator.RL2LLM(obs)
@@ -215,7 +213,6 @@ class RandomBoxKey_Planner(Base_Planner):
         ## reset dialogue
         if self.show_dialogue:
             print(self.dialogue_system)
-        self.step_planning("reset")
      
     def forward(self, obs):
         text = self.mediator.RL2LLM(obs)
@@ -254,7 +251,6 @@ class ColoredDoorKey_Planner(Base_Planner):
         if self.show_dialogue:
             print(self.dialogue_system)
     
-        self.step_planning("reset")
 
     def forward(self, obs):
         text = self.mediator.RL2LLM(obs)
