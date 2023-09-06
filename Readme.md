@@ -5,7 +5,7 @@ Large language models (LLMs) encode a vast amount of world knowledge acquired fr
 <img src= "img/framework.png" alt="llm4rl" width="1200"/>
 
 ## Purpose
-This repo is intended to serve as a foundation with which you can reproduce the results of the experiments detailed in our paper, # [Enabling Efficient Interaction between an Algorithm Agent and LLMs: A Reinforcement Learning Approach](https://arxiv.org/pdf/2306.03604.pdf)
+This repo is intended to serve as a foundation with which you can reproduce the results of the experiments detailed in our paper, [Enabling Efficient Interaction between an Algorithm Agent and LLMs: A Reinforcement Learning Approach](https://arxiv.org/pdf/2306.03604.pdf)
 
 
 ## Running experiments
