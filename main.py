@@ -10,12 +10,13 @@ os.system('rm tmp.txt')
 
 import torch
 import utils
-
+print("1")
 def setup_seed(seed):
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
     np.random.seed(seed)
     torch.backends.cudnn.deterministic = True
+    print("2")
 
 
 if __name__ == "__main__":
@@ -41,6 +42,7 @@ if __name__ == "__main__":
     
     parser.add_argument("--frame_stack", type=int, default=1)
     parser.add_argument("--run_seed_list", type=int, nargs="*", default=[0])
+    print("3")
 
 
 
@@ -54,6 +56,7 @@ if __name__ == "__main__":
         policy.eval()
         eval = utils.Eval(args,policy)
         eval.eval_policy(args.test_num)
+        print("4")
     elif sys.argv[1] == 'eval_RL':
         sys.argv.remove(sys.argv[1])
         args = parser.parse_args()
@@ -63,6 +66,7 @@ if __name__ == "__main__":
         policy.eval()
         eval = utils.Eval(args,policy)
         eval.eval_RL_policy(args.test_num)
+        print("5")
 
     elif sys.argv[1] == 'train':
         sys.argv.remove(sys.argv[1])
@@ -75,6 +79,7 @@ if __name__ == "__main__":
             game = Game(args, run_seed=i)
             game.reset()
             game.train()
+        print("6")
     elif sys.argv[1] == 'train_RL':
         sys.argv.remove(sys.argv[1])
         args = parser.parse_args()
@@ -82,21 +87,26 @@ if __name__ == "__main__":
         game = Game_RL(args)
         game.reset()
         game.train()
+        print("7")
     elif sys.argv[1] == 'baseline':
         sys.argv.remove(sys.argv[1])
         args = parser.parse_args()
         eval = utils.Eval(args)
         eval.eval_baseline(args.test_num)
+        print("8")
     elif sys.argv[1] == 'random':
         sys.argv.remove(sys.argv[1])
         args = parser.parse_args()
         eval = utils.Eval(args)
         eval.eval_policy(args.test_num)
+        print("9")
     elif sys.argv[1] == 'always':
         sys.argv.remove(sys.argv[1])
         args = parser.parse_args()
         eval = utils.Eval(args)
         eval.eval_always_ask(args.test_num)
+        print("10")
     else:
         print("Invalid option '{}'".format(sys.argv[1]))
+        print("11")
 
