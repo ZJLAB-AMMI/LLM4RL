@@ -1,0 +1,6 @@
+gymnasium==0.28.1
+minigrid==2.2.1
+numpy==1.24.3
+Requests==2.31.0
+torch==2.0.1
+torch_ac==1.4.0
