@@ -68,7 +68,7 @@ Run ```$ tensorboard --logdir=log``` then navigate to ```http://localhost:6006/`
 ## Algorithms:
 #### Currently implemented:
 * [PPO](https://arxiv.org/abs/1707.06347), VPG with ratio objective and with log likelihood objective
-* [Vicuna-7B](https://lmsys.org/projects/), An Open-Source Chatbot Impressing GPT-4 with 90%* ChatGPT Quality
+* [Vicuna-7B-v1.1](https://huggingface.co/lmsys/vicuna-7b-v1.1), the LLM model we used in our experiment
 
 ## Demonstrations:
 #### Our approach:
