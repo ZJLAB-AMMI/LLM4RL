@@ -43,7 +43,7 @@ class Game_RL(Game):
 
         self.ppo_algo = algos.PPO(self.RL_net, device=self.device, save_path=self.logger.dir, batch_size=self.batch_size)
 
-        self.mediator = SimpleDoorKey_Mediator(self.ideal)
+        self.mediator = SimpleDoorKey_Mediator()
 
 
     def flag2skill(self,obs, skill_flag):
