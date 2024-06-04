@@ -164,6 +164,7 @@ class HistoricalObsEnv(MiniGridEnv):
             vis_mask = np.ones(shape=(botX - topX, botY - topY), dtype=bool)
             
         self.mask[topX:botX, topY:botY] += vis_mask
+        obs = self.gen_obs()
         return obs, info
                 
     def slice_grid(self, topX, topY, width, height) -> FlexibleGrid:
