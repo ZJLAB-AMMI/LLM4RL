@@ -7,6 +7,16 @@ Large language models (LLMs) encode a vast amount of world knowledge acquired fr
 ## Purpose
 This repo is intended to serve as a foundation with which you can reproduce the results of the experiments detailed in our paper, [Enabling Efficient Interaction between an Algorithm Agent and LLMs: A Reinforcement Learning Approach](https://arxiv.org/pdf/2306.03604.pdf)
 
+## How you run the LLM
+For the LLM's deployment, refer to instructions in its github codes. 
+
+Here is an example of how to run Vicuna models in linux terminals:
+1. Download necessary files and model weights from https://github.com/lm-sys/FastChat
+2. Follow the commands  provided to launch the API in separate terminals (such as tmux):
+python3 -m fastchat.serve.controller --host localhost --port <controller_port>        ### Launch the controller
+python3 -m fastchat.serve.model_worker --model-name '<model_name>' --model-path <Vicuna_path> --controller http://localhost:<controller_port> --port <model_port> --worker_address http://localhost:<model_port>        ### Launch the model worker
+python3 -m fastchat.serve.api --host <API_host> --port <API_port>        ### Launch the API
+3.  In planner.py, set url to 'http://API_host:API_port/v1/chat/completions
 
 ## Running experiments
 
